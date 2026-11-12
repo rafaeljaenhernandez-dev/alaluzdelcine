@@ -352,9 +352,11 @@ ul,ol{margin:0;padding:0;list-style:none}
 /* ============================================================
    PATROCINADORES
    ============================================================ */
-.sponsors{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:30px}
-@media (min-width:700px){.sponsors{grid-template-columns:repeat(4,1fr)}}
-.slot{aspect-ratio:3/2;border-radius:12px;display:grid;place-items:center;background:var(--beige);box-shadow:0 0 0 1px rgba(28,43,69,.1)}
+.sponsors{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:30px}
+.sponsors .slot{flex:0 0 calc(50% - 6px)}
+@media (min-width:700px){.sponsors .slot{flex-basis:calc(25% - 9px)}}
+.slot{aspect-ratio:3/2;border-radius:12px;display:grid;place-items:center;padding:12px;background:var(--beige);box-shadow:0 0 0 1px rgba(28,43,69,.1)}
+.slot img{max-width:100%;max-height:100%;height:auto;object-fit:contain}
 .slot--empty{background:transparent;box-shadow:none;border:1.5px dashed var(--gris-line);color:var(--gris-line)}
 .slot--empty .icon{width:30px;height:30px;stroke-width:1.4}
 .slot img{max-width:72%;max-height:60%;object-fit:contain}
@@ -659,7 +661,7 @@ ul,ol{margin:0;padding:0;list-style:none}
   <div class="wrap">
     <h2 class="h2" id="t-patro">Patrocinadores</h2>
     <p class="lead" id="sponsors-lead">Muy pronto anunciaremos las marcas que hacen posible A la luz del cine.</p>
-    <div class="sponsors" id="sponsors"></div>
+    <ul class="sponsors" id="sponsors" aria-label="Patrocinadores"></ul>
   </div>
 </section>
 </main>
@@ -692,8 +694,17 @@ const REDES = {
   tiktok: "alaluzdelcine"       // usuario de TikTok, sin @
 };
 
-/* Para añadir patrocinadores: { nombre: "Marca", logo: "img/marca.png", web: "https://..." } */
-const PATROCINADORES = [];
+/* Para añadir patrocinadores: { nombre: "Marca", logo: "img/patrocinadores/marca.webp", ancho: 600, alto: 300 }
+   (ancho y alto del logo en píxeles: sirven para que todos se vean con un tamaño equilibrado) */
+const PATROCINADORES = [
+  { nombre: "Disney+", logo: "img/patrocinadores/disney-plus.webp", ancho: 600, alto: 328 },
+  { nombre: "Amazon", logo: "img/patrocinadores/amazon.webp", ancho: 600, alto: 189 },
+  { nombre: "Ayuntamiento de Madrid", logo: "img/patrocinadores/madrid.webp", ancho: 410, alto: 461 },
+  { nombre: "Solán de Cabras", logo: "img/patrocinadores/solan-de-cabras.webp", ancho: 514, alto: 437 },
+  { nombre: "Proyecfilm", logo: "img/patrocinadores/proyecfilm.webp", ancho: 430, alto: 76 },
+  { nombre: "360imprimir", logo: "img/patrocinadores/360imprimir.webp", ancho: 224, alto: 93 },
+  { nombre: "Despertares Publicitarios", logo: "img/patrocinadores/despertares.webp", ancho: 251, alto: 253 }
+];
 
 const DIAS = [
   {
@@ -941,12 +952,15 @@ $("#credits").innerHTML = INVITADOS.map(g => `
   const box = $("#sponsors");
   if (PATROCINADORES.length) {
     $("#sponsors-lead").textContent = "Gracias a las marcas que hacen posible A la luz del cine.";
+    // Tamaño por área: los logos alargados y los cuadrados ocupan una superficie parecida
     box.innerHTML = PATROCINADORES.map(p => {
-      const img = `<img src="${esc(p.logo)}" alt="${esc(p.nombre)}" loading="lazy">`;
-      return `<div class="slot">${p.web ? `<a href="${esc(p.web)}" target="_blank" rel="noopener">${img}</a>` : img}</div>`;
+      const ratio = (p.ancho && p.alto) ? p.ancho / p.alto : 2;
+      const w = Math.round(Math.min(Math.sqrt(8000 * ratio), 190));
+      const img = `<img src="${esc(p.logo)}" alt="${esc(p.nombre)}" width="${w}" style="width:${w}px" loading="lazy">`;
+      return `<li class="slot">${p.web ? `<a href="${esc(p.web)}" target="_blank" rel="noopener">${img}</a>` : img}</li>`;
     }).join("");
   } else {
-    box.innerHTML = Array.from({ length: 4 }, () => `<div class="slot slot--empty" aria-hidden="true"><svg class="icon"><use href="#i-reel"/></svg></div>`).join("");
+    box.innerHTML = Array.from({ length: 4 }, () => `<li class="slot slot--empty" aria-hidden="true"><svg class="icon"><use href="#i-reel"/></svg></li>`).join("");
   }
 })();
 
